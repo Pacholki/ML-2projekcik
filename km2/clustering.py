@@ -1,0 +1,90 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.cluster import KMeans
+from sklearn import preprocessing
+
+class Clusterator():
+
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self.df = self.read()
+        self.geo = ["latitude", "longitude"]
+        self.preprocess()
+
+    def read(self):
+        if self.file_name[-4:] == ".csv":
+            return pd.read_csv(self.file_name)
+        else:
+            raise ValueError("Unsuported file format")
+
+    def preprocess(self):
+        self.df = self.df.dropna()
+        self.df = self.df.drop_duplicates()
+        self.df["rating"] = pd.to_numeric(self.df["rating"], errors="coerce")
+        self.df["rating"] = self.df["rating"].fillna(0)
+        self.df["baths"] = pd.to_numeric(self.df["baths"], errors="coerce")
+        self.df["baths"] = self.df["baths"].fillna(0)
+
+    def clusterize(self, columns, model=None, ax=None):
+        if isinstance(columns, list):
+            columns_iter = columns
+        else:
+            columns_iter = [columns]
+        self.check_columns(columns_iter)
+
+        # return self.prep_df(columns_iter)
+        results_df, working_df = self.prep_df(columns_iter)
+        model.fit(working_df)
+        results_df["cluster"] = model.fit_predict(working_df)
+        return self.plot(df=results_df, color_column="cluster", ax=ax)
+
+    def prep_df(self, columns):
+
+        results_df = self.df.copy()[self.geo]
+        working_df = self.df.copy()[columns]
+
+        for column in columns:
+            mask = self.get_mask(column, working_df)
+            results_df = results_df[mask]
+            working_df = working_df[mask]
+            self.repair(column, working_df)
+
+        working_df = preprocessing.scale(working_df)
+        temp_df = pd.DataFrame(working_df, columns=columns)
+        # return sns.boxplot(data=temp_df, x="price")
+        return results_df, working_df
+
+    def get_mask(self, column, df):
+        if column == "price":
+            return np.array(df["price"] < 10000)
+        if column == "beds":
+            return np.array(df["beds"] < 18)
+            # my nie klasteryzujemy domów publicznych
+        return np.array([True] * len(df))
+
+    def repair(self, column, df):
+        if column == "minimum_nights":
+            df.loc[df["minimum_nights"] > 365, "minimum_nights"] = 365
+
+    def plot(self, df, color_column, ax):
+        return sns.scatterplot(data=df, x="longitude", y="latitude", hue=df[color_column], legend=False, palette="deep", ax=ax)
+
+    def check_columns(self, columns):
+        for column in columns:
+            if column not in self.df.columns.to_list():
+                raise ValueError(f"\"{column}\" is not a column name. Provide existing column names")
+
+    def normalize(self, df):
+        columns = df.columns.to_list()
+        for column in columns:
+            pass
+
+if __name__ == "__main__":
+    file_name = "data/dataset.csv"
+    clusterator = Clusterator(file_name=file_name)
+    model = KMeans(2)
+    # data.clusterize(columns=["longitude", "latitude"], model=model)
+    clusterator.clusterize(columns=["price", "latitude", "longitude"], model=model)
