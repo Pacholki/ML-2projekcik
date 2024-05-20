@@ -7,6 +7,8 @@ def remove_outliers(df=None, columns=None):
         columns = df.select_dtypes(include=[np.number]).columns.to_list()
 
     for column in columns:
+        if column in ['latitude', 'longitude']:
+            continue
         Q1 = df[column].quantile(0.25)
         Q3 = df[column].quantile(0.75)
         IQR = Q3 - Q1
