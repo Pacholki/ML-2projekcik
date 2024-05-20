@@ -27,19 +27,20 @@ class Clusterator():
         self.df["rating"] = self.df["rating"].fillna(0)
         self.df["baths"] = pd.to_numeric(self.df["baths"], errors="coerce")
         self.df["baths"] = self.df["baths"].fillna(0)
+        self.df["popularity"] = self.df["number_of_reviews_ltm"] / self.df["reviews_per_month"]
 
-    def clusterize(self, columns, model=None, ax=None):
+    def clusterize(self, columns, model=None):
         if isinstance(columns, list):
             columns_iter = columns
         else:
             columns_iter = [columns]
         self.check_columns(columns_iter)
 
-        # return self.prep_df(columns_iter)
         results_df, working_df = self.prep_df(columns_iter)
-        model.fit(working_df)
         results_df["cluster"] = model.fit_predict(working_df)
-        return self.plot(df=results_df, color_column="cluster", ax=ax)
+
+        self.results_df = results_df
+        self.working_df = pd.DataFrame(working_df, columns=columns_iter)
 
     def prep_df(self, columns):
 
@@ -54,7 +55,6 @@ class Clusterator():
 
         working_df = preprocessing.scale(working_df)
         temp_df = pd.DataFrame(working_df, columns=columns)
-        # return sns.boxplot(data=temp_df, x="price")
         return results_df, working_df
 
     def get_mask(self, column, df):
@@ -69,8 +69,10 @@ class Clusterator():
         if column == "minimum_nights":
             df.loc[df["minimum_nights"] > 365, "minimum_nights"] = 365
 
-    def plot(self, df, color_column, ax):
-        return sns.scatterplot(data=df, x="longitude", y="latitude", hue=df[color_column], legend=False, palette="deep", ax=ax)
+    def plot(self, df=None, color_column="cluster", palette="deep", ax=None):
+        if not df:
+            df = self.results_df
+        return sns.scatterplot(data=df, x="longitude", y="latitude", hue=df[color_column], legend=False, palette=palette, ax=ax, alpha=0.7)
 
     def check_columns(self, columns):
         for column in columns:
@@ -81,6 +83,12 @@ class Clusterator():
         columns = df.columns.to_list()
         for column in columns:
             pass
+
+    def boxplotter(self, column, df=None, ax=None):
+        if df is None:
+            df = self.working_df
+        return sns.boxplot(data=df, x=column, ax=ax)
+
 
 if __name__ == "__main__":
     file_name = "data/dataset.csv"
