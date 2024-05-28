@@ -44,7 +44,7 @@ class Clusterator():
 
     def prep_df(self, columns):
 
-        results_df = self.df.copy()[self.geo]
+        results_df = self.df.copy()
         working_df = self.df.copy()[columns]
 
         for column in columns:
@@ -54,7 +54,6 @@ class Clusterator():
             self.repair(column, working_df)
 
         working_df = preprocessing.scale(working_df)
-        temp_df = pd.DataFrame(working_df, columns=columns)
         return results_df, working_df
 
     def get_mask(self, column, df):
@@ -68,11 +67,32 @@ class Clusterator():
     def repair(self, column, df):
         if column == "minimum_nights":
             df.loc[df["minimum_nights"] > 365, "minimum_nights"] = 365
+        if column in ["price", "number_of_reviews", "reviews_per_month", "calculated_host_listings_count", "popularity"]:
+            df[column] = np.log1p(df[column])
 
-    def plot(self, df=None, color_column="cluster", palette="deep", ax=None):
+    def plot(self, df=None, color_column="cluster", palette="deep", ax=None, show_values=None):
         if not df:
             df = self.results_df
-        return sns.scatterplot(data=df, x="longitude", y="latitude", hue=df[color_column], legend=False, palette=palette, ax=ax, alpha=0.7)
+
+        legend_setting = "brief" if show_values is not None else False
+        plot = sns.scatterplot(data=df, x="longitude", y="latitude", hue=df[color_column], legend=legend_setting, palette=palette, ax=ax, alpha=0.7)
+
+        if not show_values:
+            return plot
+        
+        if isinstance(show_values, list):
+            show_values_iter = show_values
+        else:
+            show_values_iter = [show_values]
+
+        for column in show_values_iter:
+            self.print_desc_table(df=self.results_df, column=column, group_column=color_column)
+        
+        return plot
+
+    def print_desc_table(self, df, column, group_column):
+        print(f"Values of column {column}:")
+        print(df.groupby(group_column)[column].agg(["min", "max", "mean"]).reset_index())
 
     def check_columns(self, columns):
         for column in columns:
