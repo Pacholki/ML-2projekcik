@@ -6,6 +6,7 @@ from sklearn.cluster import AgglomerativeClustering
 from sklearn_extra.cluster import KMedoids
 from hdbscan import HDBSCAN
 from sklearn import mixture
+from sklearn.decomposition import PCA
 import json
 import os
 
@@ -121,16 +122,41 @@ class ModelChoiceFrame(ctk.CTkFrame):
 
     def calculate(self):
         model_name = self.model_choice.get()
-        self.generate_param_entries(self.model_choice.get())
         params = self.get_active_params(model_name)
-        args = ""
+        args = {}
         for param, details in params.items():
-            print(details["value"])
-            args += f"{param}={details['value']},"
-        args = args[:-1]
 
-        model = globals()[self.model_choice.get()](args)
-        print(model)
+            value = details["value"]
+            param_type = details.get("type", "str")  # Default to string if type is not provided
+            
+            if param_type == "int":
+                args[param] = int(value)
+            elif param_type == "float":
+                args[param] = float(value)
+            elif param_type == "str":
+                args[param] = str(value)
+            elif param_type == "NoneType":
+                args[param] = None
+            else:
+                raise ValueError(f"Unsupported parameter type: {param_type}")
+
+        model_class = globals().get(model_name)
+        if model_class:
+            try:
+                model = model_class(**args)
+            except TypeError as e:
+                print(f"Error instantiating model: {e}")
+        else:
+            print(f"Model '{model_name}' not found")
+
+        columns = [column for column, checkbox in self.column_checkboxes.items() if checkbox.get()]
+        self.master.clusterator.clusterize(model=model, columns=columns)
+
+        print("half-done")
+        plot = self.master.clusterator.plot()
+        # print(type(plot))
+        # self.generate_param_entries(self.model_choice.get())
+        print("done")
 
     def generate_param_entries(self, model_name):
         for widget in self.param_frame.winfo_children():
@@ -154,7 +180,6 @@ class ModelChoiceFrame(ctk.CTkFrame):
         value = entry.get()
         if value:
             self.master.models[self.model_choice.get()]["params"][param]["value"] = value
-            print(value)
         else:
             self.master.models[self.model_choice.get()]["params"][param]["value"] = self.master.models[self.model_choice.get()]["params"][param]["default"]
 

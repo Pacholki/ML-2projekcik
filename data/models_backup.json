@@ -2,57 +2,68 @@
     "KMeans": {
         "params": {
             "n_clusters": {
-                "value": 3,
+                "value": "19",
+                "type": "int",
                 "active": true,
                 "default": 3
             },
             "init": {
                 "value": "k-means++",
+                "type": "str",
                 "active": false,
                 "default": "k-means++"
             },
             "n_init": {
                 "value": 10,
+                "type": "int",
                 "active": false,
                 "default": 10
             },
             "max_iter": {
                 "value": 300,
+                "type": "int",
                 "active": false,
                 "default": 300
             },
             "tol": {
                 "value": 0.0001,
+                "type": "float",
                 "active": false,
                 "default": 0.0001
             },
             "precompute_distances": {
                 "value": "auto",
+                "type": "str",
                 "active": false,
                 "default": "auto"
             },
             "verbose": {
                 "value": 0,
+                "type": "int",
                 "active": false,
                 "default": 0
             },
             "random_state": {
                 "value": null,
+                "type": "NoneType",
                 "active": false,
                 "default": null
             },
             "copy_x": {
                 "value": true,
+                "type": "bool",
                 "active": false,
                 "default": true
             },
             "n_jobs": {
                 "value": 1,
+                "type": "int",
                 "active": false,
                 "default": 1
             },
             "algorithm": {
                 "value": "auto",
+                "type": "str",
                 "active": false,
                 "default": "auto"
             }
@@ -62,26 +73,31 @@
         "params": {
             "n_clusters": {
                 "value": 3,
+                "type": "int",
                 "active": true,
                 "default": 3
             },
             "init": {
                 "value": "heuristic",
+                "type": "str",
                 "active": false,
                 "default": "heuristic"
             },
             "max_iter": {
                 "value": 300,
+                "type": "int",
                 "active": false,
                 "default": 300
             },
             "tol": {
                 "value": 0.0001,
+                "type": "float",
                 "active": false,
                 "default": 0.0001
             },
             "random_state": {
                 "value": null,
+                "type": "NoneType",
                 "active": false,
                 "default": null
             }
@@ -90,42 +106,50 @@
     "DBSCAN": {
         "params": {
             "eps": {
-                "value": 0.5,
+                "value": "0.2",
+                "type": "float",
                 "active": true,
                 "default": 0.5
             },
             "min_samples": {
-                "value": 5,
+                "value": "5",
+                "type": "int",
                 "active": true,
                 "default": 5
             },
             "metric": {
                 "value": "euclidean",
+                "type": "str",
                 "active": false,
                 "default": "euclidean"
             },
             "metric_params": {
                 "value": null,
+                "type": "NoneType",
                 "active": false,
                 "default": null
             },
             "algorithm": {
                 "value": "auto",
+                "type": "str",
                 "active": false,
                 "default": "auto"
             },
             "leaf_size": {
                 "value": 30,
+                "type": "int",
                 "active": false,
                 "default": 30
             },
             "p": {
                 "value": null,
+                "type": "NoneType",
                 "active": false,
                 "default": null
             },
             "n_jobs": {
                 "value": 1,
+                "type": "int",
                 "active": false,
                 "default": 1
             }
@@ -134,77 +158,92 @@
     "HDBSCAN": {
         "params": {
             "min_cluster_size": {
-                "value": 5,
+                "value": "5",
+                "type": "int",
                 "active": true,
                 "default": 5
             },
             "metric": {
                 "value": "euclidean",
+                "type": "str",
                 "active": false,
                 "default": "euclidean"
             },
             "alpha": {
                 "value": 1.0,
+                "type": "float",
                 "active": false,
                 "default": 1.0
             },
             "min_samples": {
                 "value": null,
+                "type": "NoneType",
                 "active": false,
                 "default": null
             },
             "p": {
                 "value": 2,
+                "type": "int",
                 "active": false,
                 "default": 2
             },
             "algorithm": {
                 "value": "best",
+                "type": "str",
                 "active": false,
                 "default": "best"
             },
             "leaf_size": {
                 "value": 40,
+                "type": "int",
                 "active": false,
                 "default": 40
             },
             "approx_min_span_tree": {
                 "value": true,
+                "type": "bool",
                 "active": false,
                 "default": true
             },
             "gen_min_span_tree": {
                 "value": false,
+                "type": "bool",
                 "active": false,
                 "default": false
             },
             "core_dist_n_jobs": {
                 "value": 4,
+                "type": "int",
                 "active": false,
                 "default": 4
             },
             "cluster_selection_method": {
                 "value": "eom",
+                "type": "str",
                 "active": false,
                 "default": "eom"
             },
             "allow_single_cluster": {
                 "value": false,
+                "type": "bool",
                 "active": false,
                 "default": false
             },
             "prediction_data": {
                 "value": false,
+                "type": "bool",
                 "active": false,
                 "default": false
             },
             "match_reference_implementation": {
                 "value": false,
+                "type": "bool",
                 "active": false,
                 "default": false
             },
             "memory": {
                 "value": null,
+                "type": "NoneType",
                 "active": false,
                 "default": null
             }
@@ -214,36 +253,43 @@
         "params": {
             "n_clusters": {
                 "value": 3,
+                "type": "int",
                 "active": true,
                 "default": 3
             },
             "affinity": {
                 "value": "euclidean",
+                "type": "str",
                 "active": false,
                 "default": "euclidean"
             },
             "memory": {
                 "value": null,
+                "type": "NoneType",
                 "active": false,
                 "default": null
             },
             "connectivity": {
                 "value": null,
+                "type": "NoneType",
                 "active": false,
                 "default": null
             },
             "compute_full_tree": {
                 "value": "auto",
+                "type": "str",
                 "active": false,
                 "default": "auto"
             },
             "linkage": {
                 "value": "ward",
+                "type": "str",
                 "active": false,
                 "default": "ward"
             },
             "pooling_func": {
                 "value": "deprecated",
+                "type": "str",
                 "active": false,
                 "default": "deprecated"
             }
@@ -253,36 +299,43 @@
         "params": {
             "n_components": {
                 "value": 2,
+                "type": "int",
                 "active": true,
                 "default": 2
             },
             "copy": {
                 "value": true,
+                "type": "bool",
                 "active": false,
                 "default": true
             },
             "whiten": {
                 "value": false,
+                "type": "bool",
                 "active": false,
                 "default": false
             },
             "svd_solver": {
                 "value": "auto",
+                "type": "str",
                 "active": false,
                 "default": "auto"
             },
             "tol": {
                 "value": 0.0,
+                "type": "float",
                 "active": false,
                 "default": 0.0
             },
             "iterated_power": {
                 "value": "auto",
+                "type": "str",
                 "active": false,
                 "default": "auto"
             },
             "random_state": {
                 "value": null,
+                "type": "NoneType",
                 "active": false,
                 "default": null
             }
