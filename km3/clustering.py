@@ -77,11 +77,12 @@ class Clusterator():
         if not df:
             df = self.results_df
 
+        fig, ax = plt.subplots()
         legend_setting = "brief" if show_values is not None else False
         plot = sns.scatterplot(data=df, x="longitude", y="latitude", hue=df[color_column], legend=legend_setting, palette=palette, ax=ax, alpha=0.7)
 
         if not show_values:
-            return plot
+            return fig
         
         if isinstance(show_values, list):
             show_values_iter = show_values
@@ -91,7 +92,7 @@ class Clusterator():
         for column in show_values_iter:
             self.print_desc_table(df=self.results_df, column=column, group_column=color_column)
         
-        return plot
+        return fig
 
     def print_desc_table(self, df, column, group_column):
         print(f"Values of column {column}:")

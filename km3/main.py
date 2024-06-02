@@ -9,6 +9,8 @@ from sklearn import mixture
 from sklearn.decomposition import PCA
 import json
 import os
+from PIL import Image, ImageTk
+import io
 
 import clustering
 
@@ -32,13 +34,13 @@ class App(ctk.CTk):
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=2)
         self.model_choice_frame = ModelChoiceFrame(self)
-        self.model_choice_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
-        self.stats_frame = StatsFrame(self)
-        self.stats_frame.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
+        self.model_choice_frame.grid(row=0, column=0, rowspan=2, padx=20, pady=20, sticky="nsew")
+        # self.stats_frame = StatsFrame(self)
+        # self.stats_frame.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
         self.graph_frame = GraphFrame(self)
         self.graph_frame.grid(row=0, column=1, rowspan=2, padx=20, pady=20, sticky="nsew")
-        self.save_frame = SaveFrame(self)
-        self.save_frame.grid(row=2, column=0, columnspan=2, padx=20, pady=20, sticky="nsew")
+        # self.save_frame = SaveFrame(self)
+        # self.save_frame.grid(row=2, column=0, columnspan=2, padx=20, pady=20, sticky="nsew")
         
         
     def run(self):
@@ -121,6 +123,7 @@ class ModelChoiceFrame(ctk.CTkFrame):
         self.generate_param_entries(model_name)
 
     def calculate(self):
+        print("Calculating...")
         model_name = self.model_choice.get()
         params = self.get_active_params(model_name)
         args = {}
@@ -151,12 +154,8 @@ class ModelChoiceFrame(ctk.CTkFrame):
 
         columns = [column for column, checkbox in self.column_checkboxes.items() if checkbox.get()]
         self.master.clusterator.clusterize(model=model, columns=columns)
-
-        print("half-done")
-        plot = self.master.clusterator.plot()
-        # print(type(plot))
-        # self.generate_param_entries(self.model_choice.get())
-        print("done")
+        print("Done")
+        self.master.graph_frame.plot()
 
     def generate_param_entries(self, model_name):
         for widget in self.param_frame.winfo_children():
@@ -208,10 +207,31 @@ class GraphFrame(ctk.CTkFrame):
 
     def __init__(self, master=None):
         super().__init__(master)
-        self.create_widgets()
+        
+        # add plot button
+        # self.plot_button = ctk.CTkButton(master=self, text="Plot", command=self.plot)
+        # self.plot_button.pack()
 
-    def create_widgets(self):
-        pass
+    def plot(self):
+        # remove previous image if exists
+        if hasattr(self, "image_label"):
+            self.image_label.destroy()
+
+        values = [value for value, checkbox in self.master.model_choice_frame.value_checkboxes.items() if checkbox.get()]
+        plot = self.master.clusterator.plot(show_values=values)
+
+        buf = io.BytesIO()
+        plot.savefig(buf, format='png')
+        buf.seek(0)
+
+        # Load the image from the buffer
+        image = Image.open(buf)
+        photo = ImageTk.PhotoImage(image)
+
+        # Create a CTkLabel to display the image
+        self.image_label = ctk.CTkLabel(master=self, image=photo)
+        self.image_label.image = photo  # Keep a reference to avoid garbage collection
+        self.image_label.pack(side=ctk.TOP, fill=ctk.BOTH, expand=True)
 
 if __name__ == "__main__":
     app = App()
