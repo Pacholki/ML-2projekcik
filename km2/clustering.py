@@ -28,7 +28,6 @@ class Clusterator():
         self.df["baths"] = pd.to_numeric(self.df["baths"], errors="coerce")
         self.df["baths"] = self.df["baths"].fillna(0)
         self.df["popularity"] = self.df["number_of_reviews_ltm"] / self.df["reviews_per_month"]
-
     def clusterize(self, columns, model=None):
         if isinstance(columns, list):
             columns_iter = columns
