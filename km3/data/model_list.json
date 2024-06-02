@@ -1,0 +1,78 @@
+{
+    "KMeans": {
+        "params": {
+            "n_clusters": 3,
+            "init": "k-means++",
+            "n_init": 10,
+            "max_iter": 300,
+            "tol": 0.0001,
+            "precompute_distances": "auto",
+            "verbose": 0,
+            "random_state": null,
+            "copy_x": true,
+            "n_jobs": 1,
+            "algorithm": "auto"
+        }
+    },
+    "KMedoids": {
+        "params": {
+            "n_clusters": 3,
+            "init": "heuristic",
+            "max_iter": 300,
+            "tol": 0.0001,
+            "random_state": null
+        }
+    },
+    "DBSCAN": {
+        "params": {
+            "eps": 0.5,
+            "min_samples": 5,
+            "metric": "euclidean",
+            "metric_params": null,
+            "algorithm": "auto",
+            "leaf_size": 30,
+            "p": null,
+            "n_jobs": 1
+        }
+    },
+    "HDBSCAN": {
+        "params": {
+            "min_cluster_size": 5,
+            "metric": "euclidean",
+            "alpha": 1.0,
+            "min_samples": null,
+            "p": 2,
+            "algorithm": "best",
+            "leaf_size": 40,
+            "approx_min_span_tree": true,
+            "gen_min_span_tree": false,
+            "core_dist_n_jobs": 4,
+            "cluster_selection_method": "eom",
+            "allow_single_cluster": false,
+            "prediction_data": false,
+            "match_reference_implementation": false
+        }
+    },
+    "AgglomerativeClustering": {
+        "params": {
+            "n_clusters": 3,
+            "affinity": "euclidean",
+            "memory": null,
+            "connectivity": null,
+            "compute_full_tree": "auto",
+            "linkage": "ward",
+            "pooling_func": "deprecated"
+        }
+    },
+    "PCA": {
+        "params": {
+            "n_components": 2,
+            "copy": true,
+            "whiten": false,
+            "svd_solver": "auto",
+            "tol": 0.0,
+            "iterated_power": "auto",
+            "random_state": null
+        }
+    }
+}
