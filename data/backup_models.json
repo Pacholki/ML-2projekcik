@@ -2,7 +2,7 @@
     "KMeans": {
         "params": {
             "n_clusters": {
-                "value": "5",
+                "value": 3,
                 "active": true,
                 "default": 3
             },
@@ -90,7 +90,7 @@
     "DBSCAN": {
         "params": {
             "eps": {
-                "value": "100",
+                "value": 0.5,
                 "active": true,
                 "default": 0.5
             },
