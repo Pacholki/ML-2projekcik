@@ -1,7 +1,7 @@
 {
     "KMeans": {
         "params": {
-            "n_clusters": 3,
+            "n_clusters": {"value": 3, "active": true},
             "init": "k-means++",
             "n_init": 10,
             "max_iter": 300,

@@ -20,6 +20,9 @@ class Clusterator():
         else:
             raise ValueError("Unsuported file format")
 
+    def get_columns(self):
+        return self.df.columns.to_list()
+
     def preprocess(self):
         self.df = self.df.dropna()
         self.df = self.df.drop_duplicates()
