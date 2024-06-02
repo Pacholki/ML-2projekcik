@@ -138,7 +138,7 @@
             "leaf_size": {
                 "value": "31",
                 "type": "int",
-                "active": true,
+                "active": false,
                 "default": 30
             },
             "p": {
