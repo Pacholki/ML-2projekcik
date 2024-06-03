@@ -226,12 +226,15 @@ class GraphFrame(ctk.CTkFrame):
 
         # Load the image from the buffer
         image = Image.open(buf)
+        window_height = self.winfo_height()
+        window_width = image.width * window_height // image.height
+        image = image.resize((window_width, window_height), Image.Resampling.LANCZOS)
         photo = ImageTk.PhotoImage(image)
 
         # Create a CTkLabel to display the image
         self.image_label = ctk.CTkLabel(master=self, image=photo)
         self.image_label.image = photo  # Keep a reference to avoid garbage collection
-        self.image_label.pack(side=ctk.TOP, fill=ctk.BOTH, expand=True)
+        self.image_label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
 
 if __name__ == "__main__":
     app = App()
