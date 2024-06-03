@@ -96,7 +96,7 @@ class Clusterator():
         plot = sns.scatterplot(data=df, x="longitude", y="latitude", hue=df[color_column], legend=legend_setting, palette=palette, ax=ax, alpha=0.7)
 
         if not show_values:
-            return fig
+            return plot
         
         if isinstance(show_values, list):
             show_values_iter = show_values
@@ -106,7 +106,7 @@ class Clusterator():
         for column in show_values_iter:
             self.print_desc_table(df=self.results_df, column=column, group_column=color_column)
         
-        return fig
+        return plot
     
     def plot_explainded_variance(self, columns):
         scaler = StandardScaler()
@@ -142,6 +142,7 @@ class Clusterator():
         scatter = plt.scatter(pca_df['PC1'], pca_df['PC2'], c=pca_df['cluster'], cmap='viridis', alpha=0.7)
         plt.xlabel('Principal Component 1')
         plt.ylabel('Principal Component 2')
+        plt.legend(*scatter.legend_elements(), title='Clusters')
         plt.title(f'{model.__class__.__name__} Clustering Visualization in 2D')
         plt.show()
 
@@ -207,6 +208,20 @@ class Clusterator():
             kmeans.fit(df)
             davies_bouldin.append(davies_bouldin_score(df, kmeans.labels_))
         return davies_bouldin
+    
+    def plot_features_distributiony_by_clusters(self, columns, df=None, cluster_column="cluster", ax=None):
+        if not df:
+            df = self.results_df
+        self.check_columns(columns)
+        ## i want grid layout (2 plots each row)
+        fig, ax = plt.subplots(len(columns)//2 + 1, 2, figsize=(15, 15))
+        ax = ax.flatten()
+        for i, column in enumerate(columns):
+            sns.boxplot(data=df, hue=cluster_column, y=column, ax=ax[i], palette='viridis')            
+            ax[i].set_title(f'{column} by cluster')
+        plt.tight_layout()
+        plt.show()
+
 
     def print_desc_table(self, df, column, group_column):
         print(f"Values of column {column}:")
