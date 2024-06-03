@@ -5,7 +5,7 @@
             "init": {"value": "k-means++", "active": false},
             "n_init": {"value": 10, "active": false},
             "max_iter": {"value": 300, "active": false},
-            "tol": {"value": 0.0001, "active": true},
+            "tol": {"value": 0.0001, "active": false},
             "precompute_distances": {"value": "auto", "active": false},
             "verbose": {"value": 0, "active": false},
             "random_state": {"value": null, "active": false},
