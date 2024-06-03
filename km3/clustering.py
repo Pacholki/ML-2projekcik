@@ -146,6 +146,14 @@ class Clusterator():
         plt.colorbar(scatter, label='Cluster')
         plt.show()
 
+    def plot_cluster_distribution(self, df=None, column="cluster", ax=None):
+        if not df:
+            df = self.results_df
+
+        sns.countplot(x=column, data=df, ax=ax, palette='viridis')
+        plt.title('Cluster Distribution')
+        plt.show()
+
     def plot_metric_scores(self, n_components, columns, max_clusters=12, df=None):
         if not df:
             df = self.results_df
