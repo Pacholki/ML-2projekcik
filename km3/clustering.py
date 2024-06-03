@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import StandardScaler
-from sklearn.metrics import calinski_harabasz_score, silhouette_score
+from sklearn.metrics import davies_bouldin_score, silhouette_score
 
 class Clusterator():
 
@@ -140,12 +140,12 @@ class Clusterator():
         ax[1].set_title("Silhouette Score")
         ax[1].set_xlabel("Number of clusters")
         ax[1].set_ylabel("Silhouette Score")
-        
+
         ax[2].plot(range(2, max_clusters), calinski)
         ax[2].set_title("Calinski Harabasz Score")
         ax[2].set_xlabel("Number of clusters")
         ax[2].set_ylabel("Calinski Harabasz Score")
-       
+        
         plt.tight_layout()
         plt.show()
 
@@ -165,13 +165,13 @@ class Clusterator():
             silhouette.append(silhouette_score(df, kmeans.labels_))
         return silhouette
     
-    def calinski_harabasz_score_counter(self, df, max_clusters):
-        calinski = []
+    def davies_bouldin_score_counter(self, df, max_clusters):
+        davies_bouldin = []
         for i in range(2, max_clusters):
             kmeans = KMeans(n_clusters=i, random_state=311)
             kmeans.fit(df)
-            calinski.append(calinski_harabasz_score(df, kmeans.labels_))
-        return calinski
+            davies_bouldin.append(davies_bouldin_score(df, kmeans.labels_))
+        return davies_bouldin
 
     def print_desc_table(self, df, column, group_column):
         print(f"Values of column {column}:")
