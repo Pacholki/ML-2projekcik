@@ -143,7 +143,6 @@ class Clusterator():
         plt.xlabel('Principal Component 1')
         plt.ylabel('Principal Component 2')
         plt.title(f'{model.__class__.__name__} Clustering Visualization in 2D')
-        plt.colorbar(scatter, label='Cluster')
         plt.show()
 
     def plot_cluster_distribution(self, df=None, column="cluster", ax=None):
