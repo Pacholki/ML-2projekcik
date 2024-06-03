@@ -108,6 +108,23 @@ class Clusterator():
         
         return fig
     
+    def plot_explainded_variance(self, columns):
+        scaler = StandardScaler()
+        data = self.df
+        data = scaler.fit_transform(data[columns])
+        data = pd.DataFrame(data, columns=columns)
+        pca = PCA()
+        pca.fit(data)
+        per_var = np.round(pca.explained_variance_ratio_*100, decimals = 1)
+
+        plt.figure(figsize = (10,6))
+        plt.plot(range(1, len(per_var)+1), per_var.cumsum(), marker = "o", linestyle = "--")
+        plt.grid()
+        plt.ylabel("Percentage Cumulative of Explained Variance")
+        plt.xlabel("Number of Components")
+        plt.title("Explained Variance by Component")
+        plt.show()
+    
     def pca_plot(self, model, columns, df=None, n_components=2, ax=None):
         if not df:
             df = self.results_df
