@@ -5,6 +5,8 @@ import seaborn as sns
 
 from sklearn.cluster import KMeans
 from sklearn import preprocessing
+from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import StandardScaler
 
 class Clusterator():
 
@@ -27,7 +29,7 @@ class Clusterator():
         self.df = self.df.dropna()
         self.df = self.df.drop_duplicates()
         self.df["rating"] = pd.to_numeric(self.df["rating"], errors="coerce")
-        self.df["rating"] = self.df["rating"].fillna(0)
+        self.df["rating"] = self.df["rating"].fillna(4)
         self.df["baths"] = pd.to_numeric(self.df["baths"], errors="coerce")
         self.df["baths"] = self.df["baths"].fillna(0)
         self.df["popularity"] = self.df["number_of_reviews_ltm"] / self.df["reviews_per_month"]
@@ -93,6 +95,29 @@ class Clusterator():
             self.print_desc_table(df=self.results_df, column=column, group_column=color_column)
         
         return fig
+    
+    def pca_plot(self, model, columns, df=None, n_components=2, ax=None):
+        if not df:
+            df = self.results_df
+
+        pca = PCA(n_components=n_components)
+        df = df[columns]
+        df = StandardScaler().fit_transform(df)
+        pca_result = pca.fit_transform(df)
+        model.fit(pca_result)
+        pca_2 = PCA(n_components=2)
+        pca_result_2 = pca_2.fit_transform(df)
+        pca_df = pd.DataFrame(pca_result_2, columns=["PC1", "PC2"])
+        pca_df["cluster"] = model.labels_
+       
+        plt.figure(figsize=(10, 8))
+        scatter = plt.scatter(pca_df['PC1'], pca_df['PC2'], c=pca_df['cluster'], cmap='viridis', alpha=0.7)
+        plt.xlabel('Principal Component 1')
+        plt.ylabel('Principal Component 2')
+        plt.title('KMeans Clustering Visualization in 2D')
+        plt.colorbar(scatter, label='Cluster')
+        plt.show()
+
 
     def print_desc_table(self, df, column, group_column):
         print(f"Values of column {column}:")
