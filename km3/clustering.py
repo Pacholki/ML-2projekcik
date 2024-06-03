@@ -33,6 +33,17 @@ class Clusterator():
         self.df["baths"] = pd.to_numeric(self.df["baths"], errors="coerce")
         self.df["baths"] = self.df["baths"].fillna(0)
         self.df["popularity"] = self.df["number_of_reviews_ltm"] / self.df["reviews_per_month"]
+        self.encode_room_type()
+    
+    def encode_room_type(self):
+        room_type_map = {
+            "Shared room": 0,
+            "Private room": 1,
+            "Hotel room": 2,
+            "Entire home/apt": 3
+        }
+        self.df["room_type"] = self.df["room_type"].map(room_type_map)
+        
 
     def clusterize(self, columns, model=None):
         if isinstance(columns, list):
