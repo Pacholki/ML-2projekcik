@@ -7,6 +7,7 @@ from sklearn.cluster import KMeans
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import StandardScaler
+from sklearn.metrics import calinski_harabasz_score, silhouette_score
 
 class Clusterator():
 
@@ -120,15 +121,68 @@ class Clusterator():
         pca_result_2 = pca_2.fit_transform(df)
         pca_df = pd.DataFrame(pca_result_2, columns=["PC1", "PC2"])
         pca_df["cluster"] = model.labels_
-       
         plt.figure(figsize=(10, 8))
         scatter = plt.scatter(pca_df['PC1'], pca_df['PC2'], c=pca_df['cluster'], cmap='viridis', alpha=0.7)
         plt.xlabel('Principal Component 1')
         plt.ylabel('Principal Component 2')
-        plt.title('KMeans Clustering Visualization in 2D')
+        plt.title(f'{model.__class__.__name__} Clustering Visualization in 2D')
         plt.colorbar(scatter, label='Cluster')
         plt.show()
 
+    def plot_metric_scores(self, n_components, columns, max_clusters=12, df=None):
+        if not df:
+            df = self.results_df
+
+        pca = PCA(n_components=n_components)
+        df = df[columns]
+        df = StandardScaler().fit_transform(df)
+        pca_result = pca.fit_transform(df)
+        wcss = self.wcss_score_counter(pca_result, max_clusters)
+        silhouette = self.silhouette_score_counter(pca_result, max_clusters)
+        calinski = self.calinski_harabasz_score_counter(pca_result, max_clusters)
+        fig, ax = plt.subplots(3, 1, figsize=(10, 15))
+        
+        ax[0].plot(range(1, max_clusters), wcss)
+        ax[0].set_title("WCSS")
+        ax[0].set_xlabel("Number of clusters")
+        ax[0].set_ylabel("WCSS")
+        
+        ax[1].plot(range(2, max_clusters), silhouette)
+        ax[1].set_title("Silhouette Score")
+        ax[1].set_xlabel("Number of clusters")
+        ax[1].set_ylabel("Silhouette Score")
+        
+        ax[2].plot(range(2, max_clusters), calinski)
+        ax[2].set_title("Calinski Harabasz Score")
+        ax[2].set_xlabel("Number of clusters")
+        ax[2].set_ylabel("Calinski Harabasz Score")
+       
+        plt.tight_layout()
+        plt.show()
+
+    def wcss_score_counter(self, df, max_clusters):
+        wcss = []
+        for i in range(1, max_clusters):
+            kmeans = KMeans(n_clusters=i, random_state=311)
+            kmeans.fit(df)
+            wcss.append(kmeans.score(df)*-1)
+        return wcss
+    
+    def silhouette_score_counter(self, df, max_clusters):
+        silhouette = []
+        for i in range(2, max_clusters):
+            kmeans = KMeans(n_clusters=i, random_state=311)
+            kmeans.fit(df)
+            silhouette.append(silhouette_score(df, kmeans.labels_))
+        return silhouette
+    
+    def calinski_harabasz_score_counter(self, df, max_clusters):
+        calinski = []
+        for i in range(2, max_clusters):
+            kmeans = KMeans(n_clusters=i, random_state=311)
+            kmeans.fit(df)
+            calinski.append(calinski_harabasz_score(df, kmeans.labels_))
+        return calinski
 
     def print_desc_table(self, df, column, group_column):
         print(f"Values of column {column}:")
