@@ -156,7 +156,7 @@ class Clusterator():
         pca_result = pca.fit_transform(df)
         wcss = self.wcss_score_counter(pca_result, max_clusters)
         silhouette = self.silhouette_score_counter(pca_result, max_clusters)
-        calinski = self.calinski_harabasz_score_counter(pca_result, max_clusters)
+        davies_bouldin_score = self.davies_bouldin_score_counter(pca_result, max_clusters)
         fig, ax = plt.subplots(3, 1, figsize=(10, 15))
         
         ax[0].plot(range(1, max_clusters), wcss)
@@ -169,10 +169,10 @@ class Clusterator():
         ax[1].set_xlabel("Number of clusters")
         ax[1].set_ylabel("Silhouette Score")
 
-        ax[2].plot(range(2, max_clusters), calinski)
-        ax[2].set_title("Calinski Harabasz Score")
+        ax[2].plot(range(2, max_clusters), davies_bouldin_score)
+        ax[2].set_title("Davies Bouldin Score")
         ax[2].set_xlabel("Number of clusters")
-        ax[2].set_ylabel("Calinski Harabasz Score")
+        ax[2].set_ylabel("Davies Bouldin Score")
         
         plt.tight_layout()
         plt.show()
