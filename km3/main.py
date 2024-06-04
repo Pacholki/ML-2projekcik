@@ -5,7 +5,7 @@ from sklearn.cluster import DBSCAN
 from sklearn.cluster import AgglomerativeClustering
 from sklearn_extra.cluster import KMedoids
 from hdbscan import HDBSCAN
-from sklearn import mixture
+from sklearn.mixture import GaussianMixture
 from sklearn.decomposition import PCA
 import json
 import os
@@ -28,17 +28,12 @@ class App(ctk.CTk):
         self.columns = self.read_columns()
         self.models = self.read_models()
 
-        self.grid_rowconfigure(0, weight=2)
-        self.grid_rowconfigure(1, weight=4)
-        self.grid_rowconfigure(2, weight=1)
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=2)
         self.model_choice_frame = ModelChoiceFrame(self)
-        self.model_choice_frame.grid(row=0, column=0, rowspan=2, padx=20, pady=20, sticky="nsew")
-        # self.stats_frame = StatsFrame(self)
-        # self.stats_frame.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
+        self.model_choice_frame.grid(row=0, column=0, padx=20, pady=20, sticky="ns")
+        self.stats_frame = StatsFrame(self)
+        self.stats_frame.grid(row=0, column=2, padx=20, pady=20, sticky="nsew")
         self.graph_frame = GraphFrame(self)
-        self.graph_frame.grid(row=0, column=1, rowspan=2, padx=20, pady=20, sticky="nsew")
+        self.graph_frame.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
         # self.save_frame = SaveFrame(self)
         # self.save_frame.grid(row=2, column=0, columnspan=2, padx=20, pady=20, sticky="nsew")
         
@@ -90,6 +85,8 @@ class ModelChoiceFrame(ctk.CTkFrame):
         self.model_choice.configure(width=250, height=30)
         self.model_choice.grid(row=0, column=0, columnspan=3, padx=5, pady=5)
 
+        self.grid_columnconfigure(1, weight=2)
+        self.grid_columnconfigure(2, weight=1)
         self.param_frame = ctk.CTkFrame(master=self)
         self.column_frame = ctk.CTkFrame(master=self)
         self.value_frame = ctk.CTkFrame(master=self)
@@ -99,6 +96,21 @@ class ModelChoiceFrame(ctk.CTkFrame):
 
         self.calculate_button = ctk.CTkButton(master=self, text="Calculate", command=self.calculate)
         self.calculate_button.grid(row=2, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+
+        self.plot_button = ctk.CTkButton(master=self, text="Plot", command=self.plot)
+        self.plot_button.grid(row=3, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+        
+        self.plot_pca_button = ctk.CTkButton(master=self, text="Plot PCA", command=self.plot_pca)
+        self.plot_pca_button.grid(row=4, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+
+        self.plot_stats_button = ctk.CTkButton(master=self, text="Plot Stats", command=self.plot_stats)
+        self.plot_stats_button.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+
+        self.n_components_entry = ctk.CTkEntry(master=self, placeholder_text="Number of components")
+        self.n_components_entry.grid(row=6, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+
+        self.status_label = ctk.CTkLabel(master=self, text="")
+        self.status_label.grid(row=7, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
 
         self.generate_column_checkboxes()
 
@@ -123,7 +135,9 @@ class ModelChoiceFrame(ctk.CTkFrame):
         self.generate_param_entries(model_name)
 
     def calculate(self):
-        print("Calculating...")
+
+        self.status_label.configure(text="Calculating...")
+
         model_name = self.model_choice.get()
         params = self.get_active_params(model_name)
         args = {}
@@ -154,8 +168,19 @@ class ModelChoiceFrame(ctk.CTkFrame):
 
         columns = [column for column, checkbox in self.column_checkboxes.items() if checkbox.get()]
         self.master.clusterator.clusterize(model=model, columns=columns)
-        print("Done")
+        self.master.columns = columns
+        self.master.model = model
+
+        self.status_label.configure(text="Done")
+
+    def plot(self):
         self.master.graph_frame.plot()
+
+    def plot_pca(self):
+        self.master.graph_frame.pca_plot(model=self.master.model, columns=self.master.columns)
+
+    def plot_stats(self):
+        self.master.stats_frame.plot()
 
     def generate_param_entries(self, model_name):
         for widget in self.param_frame.winfo_children():
@@ -187,11 +212,30 @@ class StatsFrame(ctk.CTkFrame):
 
     def __init__(self, master=None):
         super().__init__(master)
-        self.create_widgets()
 
-    def create_widgets(self):
-        pass
+    def plot(self):
+        
+        if hasattr(self, "image_label"):
+            self.image_label.destroy()
 
+        values = [value for value, checkbox in self.master.model_choice_frame.value_checkboxes.items() if checkbox.get()]
+        plot = self.master.clusterator.plot_features_distributiony_by_clusters(values)
+
+        buf = io.BytesIO()
+        plot.savefig(buf, format='png')
+        buf.seek(0)
+
+        # Load the image from the buffer
+        image = Image.open(buf)
+        window_height = self.winfo_height()
+        window_width = self.winfo_width()
+        image = image.resize((900, 1300), Image.Resampling.LANCZOS)
+        photo = ImageTk.PhotoImage(image)
+
+        # Create a CTkLabel to display the image
+        self.image_label = ctk.CTkLabel(master=self, image=photo)
+        self.image_label.image = photo  # Keep a reference to avoid garbage collection
+        self.image_label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
 
 class SaveFrame(ctk.CTkFrame):
 
@@ -228,7 +272,33 @@ class GraphFrame(ctk.CTkFrame):
         image = Image.open(buf)
         window_height = self.winfo_height()
         window_width = image.width * window_height // image.height
-        image = image.resize((window_width, window_height), Image.Resampling.LANCZOS)
+        image = image.resize((1500, 1300), Image.Resampling.LANCZOS)
+        photo = ImageTk.PhotoImage(image)
+
+        # Create a CTkLabel to display the image
+        self.image_label = ctk.CTkLabel(master=self, image=photo)
+        self.image_label.image = photo  # Keep a reference to avoid garbage collection
+        self.image_label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+
+    def pca_plot(self, model, columns):
+
+        if hasattr(self, "image_label"):
+            self.image_label.destroy()
+            
+        values = [value for value, checkbox in self.master.model_choice_frame.value_checkboxes.items() if checkbox.get()]
+        print(type(self.master))
+        n_components = int(self.master.model_choice_frame.n_components_entry.get())
+        plot = self.master.clusterator.pca_plot(model=model, columns=columns, n_components=n_components)
+
+        buf = io.BytesIO()
+        plot.savefig(buf, format='png')
+        buf.seek(0)
+
+        # Load the image from the buffer
+        image = Image.open(buf)
+        window_height = self.winfo_height()
+        window_width = image.width * window_height // image.height
+        image = image.resize((1500, 1300), Image.Resampling.LANCZOS)
         photo = ImageTk.PhotoImage(image)
 
         # Create a CTkLabel to display the image

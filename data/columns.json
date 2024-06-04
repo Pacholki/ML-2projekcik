@@ -8,5 +8,9 @@
     "calculated_host_listings_count",
     "availability_365",
     "number_of_reviews_ltm",
-    "popularity"
+    "popularity",
+    "baths",
+    "beds",
+    "room_type",
+    "rating"
 ]

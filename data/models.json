@@ -136,7 +136,7 @@
                 "default": "auto"
             },
             "leaf_size": {
-                "value": "31",
+                "value": 30,
                 "type": "int",
                 "active": false,
                 "default": 30
@@ -338,6 +338,94 @@
                 "type": "NoneType",
                 "active": false,
                 "default": null
+            }
+        }
+    },
+    "GaussianMixture": {
+        "params": {
+            "n_components": {
+                "value": 3,
+                "type": "int",
+                "active": true,
+                "default": 1
+            },
+            "covariance_type": {
+                "value": "full",
+                "type": "str",
+                "active": true,
+                "default": "full"
+            },
+            "tol": {
+                "value": 0.001,
+                "type": "float",
+                "active": false,
+                "default": 0.001
+            },
+            "reg_covar": {
+                "value": 1e-06,
+                "type": "float",
+                "active": false,
+                "default": 1e-06
+            },
+            "max_iter": {
+                "value": 100,
+                "type": "int",
+                "active": false,
+                "default": 100
+            },
+            "n_init": {
+                "value": 1,
+                "type": "int",
+                "active": false,
+                "default": 1
+            },
+            "init_params": {
+                "value": "kmeans",
+                "type": "str",
+                "active": false,
+                "default": "kmeans"
+            },
+            "weights_init": {
+                "value": null,
+                "type": "NoneType",
+                "active": false,
+                "default": null
+            },
+            "means_init": {
+                "value": null,
+                "type": "NoneType",
+                "active": false,
+                "default": null
+            },
+            "precisions_init": {
+                "value": null,
+                "type": "NoneType",
+                "active": false,
+                "default": null
+            },
+            "random_state": {
+                "value": null,
+                "type": "NoneType",
+                "active": false,
+                "default": null
+            },
+            "warm_start": {
+                "value": false,
+                "type": "bool",
+                "active": false,
+                "default": false
+            },
+            "verbose": {
+                "value": 0,
+                "type": "int",
+                "active": false,
+                "default": 0
+            },
+            "verbose_interval": {
+                "value": 10,
+                "type": "int",
+                "active": false,
+                "default": 10
             }
         }
     }
