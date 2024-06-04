@@ -87,16 +87,16 @@ class Clusterator():
         if column in ["price", "number_of_reviews", "reviews_per_month", "calculated_host_listings_count", "popularity"]:
             df[column] = np.log1p(df[column])
 
-    def plot(self, df=None, color_column="cluster", palette="deep", ax=None, show_values=None):
+    def plot(self, df=None, color_column="cluster", palette="viridis", ax=None, show_values=None):
         if not df:
             df = self.results_df
 
         fig, ax = plt.subplots()
         legend_setting = "brief" if show_values is not None else False
-        plot = sns.scatterplot(data=df, x="longitude", y="latitude", hue=df[color_column], legend=legend_setting, palette=palette, ax=ax, alpha=0.7)
+        plot = sns.scatterplot(data=df, x="longitude", y="latitude", hue=df[color_column], legend=legend_setting, palette=palette, ax=ax, alpha=0.7, sizes=(0.5, 0.5))
 
         if not show_values:
-            return plot
+            return fig
         
         if isinstance(show_values, list):
             show_values_iter = show_values
@@ -106,7 +106,7 @@ class Clusterator():
         for column in show_values_iter:
             self.print_desc_table(df=self.results_df, column=column, group_column=color_column)
         
-        return plot
+        return fig
     
     def plot_explainded_variance(self, columns):
         scaler = StandardScaler()
@@ -137,14 +137,23 @@ class Clusterator():
         pca_2 = PCA(n_components=2)
         pca_result_2 = pca_2.fit_transform(df)
         pca_df = pd.DataFrame(pca_result_2, columns=["PC1", "PC2"])
-        pca_df["cluster"] = model.labels_
-        plt.figure(figsize=(10, 8))
-        scatter = plt.scatter(pca_df['PC1'], pca_df['PC2'], c=pca_df['cluster'], cmap='viridis', alpha=0.7)
+        try:
+            pca_df["cluster"] = model.labels_
+        except:
+            pca_df["cluster"] = model.predict(pca_result)
+        fig, ax = plt.subplots()
+        plot = plt.scatter(pca_df['PC1'], pca_df['PC2'], c=pca_df['cluster'], cmap='viridis', alpha=0.7)
         plt.xlabel('Principal Component 1')
         plt.ylabel('Principal Component 2')
-        plt.legend(*scatter.legend_elements(), title='Clusters')
+        plt.legend(*plot.legend_elements(), title='Clusters')
         plt.title(f'{model.__class__.__name__} Clustering Visualization in 2D')
-        plt.show()
+
+        try:
+            self.results_df["cluster"] = model.labels_
+        except:
+            self.results_df["cluster"] = model.predict(pca_result)
+
+        return fig
 
     def plot_cluster_distribution(self, df=None, column="cluster", ax=None):
         if not df:
@@ -213,15 +222,10 @@ class Clusterator():
         if not df:
             df = self.results_df
         self.check_columns(columns)
-        ## i want grid layout (2 plots each row)
-        fig, ax = plt.subplots(len(columns)//2 + 1, 2, figsize=(15, 15))
-        ax = ax.flatten()
-        for i, column in enumerate(columns):
-            sns.boxplot(data=df, hue=cluster_column, y=column, ax=ax[i], palette='viridis')            
-            ax[i].set_title(f'{column} by cluster')
-        plt.tight_layout()
-        plt.show()
-
+        column = columns[0]
+        fig, ax = plt.subplots()
+        sns.boxplot(data=df, hue=cluster_column, y=column, palette='viridis')            
+        return fig
 
     def print_desc_table(self, df, column, group_column):
         print(f"Values of column {column}:")
