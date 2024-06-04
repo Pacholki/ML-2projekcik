@@ -22,6 +22,8 @@ class App(ctk.CTk):
         self.title("Model Viewer")
         self.geometry("1200x800")
         self.minsize(1200, 800)
+        self.vertical_resolution = 1300
+        self.horizontal_resolution = 3400
 
         self.data_file_path = "data/dataset.csv"
         self.clusterator = clustering.Clusterator(self.data_file_path)
@@ -29,11 +31,11 @@ class App(ctk.CTk):
         self.models = self.read_models()
 
         self.model_choice_frame = ModelChoiceFrame(self)
-        self.model_choice_frame.grid(row=0, column=0, padx=20, pady=20, sticky="ns")
-        self.stats_frame = StatsFrame(self)
-        self.stats_frame.grid(row=0, column=2, padx=20, pady=20, sticky="nsew")
+        self.model_choice_frame.grid(row=0, column=0, padx=20, pady=5, sticky="ns")
         self.graph_frame = GraphFrame(self)
-        self.graph_frame.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
+        self.graph_frame.grid(row=1, column=0, padx=20, pady=5, sticky="nsew")
+        self.stats_frame = StatsFrame(self)
+        self.stats_frame.grid(row=0, column=1, rowspan=2, padx=20, pady=5, sticky="nsew")
         # self.save_frame = SaveFrame(self)
         # self.save_frame.grid(row=2, column=0, columnspan=2, padx=20, pady=20, sticky="nsew")
         
@@ -90,27 +92,27 @@ class ModelChoiceFrame(ctk.CTkFrame):
         self.param_frame = ctk.CTkFrame(master=self)
         self.column_frame = ctk.CTkFrame(master=self)
         self.value_frame = ctk.CTkFrame(master=self)
-        self.param_frame.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
-        self.column_frame.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
-        self.value_frame.grid(row=1, column=2, padx=5, pady=5, sticky="nsew")
+        self.param_frame.grid(row=1, column=0, rowspan=5, padx=5, pady=5, sticky="nsew")
+        self.column_frame.grid(row=1, column=1, rowspan=5, padx=5, pady=5, sticky="nsew")
+        self.value_frame.grid(row=1, column=2, rowspan=5, padx=5, pady=5, sticky="nsew")
 
         self.calculate_button = ctk.CTkButton(master=self, text="Calculate", command=self.calculate)
-        self.calculate_button.grid(row=2, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+        self.calculate_button.grid(row=0, column=4, padx=5, pady=5, sticky="nsew")
 
         self.plot_button = ctk.CTkButton(master=self, text="Plot", command=self.plot)
-        self.plot_button.grid(row=3, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+        self.plot_button.grid(row=1, column=4, padx=5, pady=5, sticky="nsew")
         
         self.plot_pca_button = ctk.CTkButton(master=self, text="Plot PCA", command=self.plot_pca)
-        self.plot_pca_button.grid(row=4, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+        self.plot_pca_button.grid(row=2, column=4, padx=5, pady=5, sticky="nsew")
 
         self.plot_stats_button = ctk.CTkButton(master=self, text="Plot Stats", command=self.plot_stats)
-        self.plot_stats_button.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+        self.plot_stats_button.grid(row=3, column=4, padx=5, pady=5, sticky="nsew")
 
         self.n_components_entry = ctk.CTkEntry(master=self, placeholder_text="Number of components")
-        self.n_components_entry.grid(row=6, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+        self.n_components_entry.grid(row=4, column=4, padx=5, pady=5, sticky="nsew")
 
         self.status_label = ctk.CTkLabel(master=self, text="")
-        self.status_label.grid(row=7, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+        self.status_label.grid(row=5, column=4, padx=5, pady=5, sticky="nsew")
 
         self.generate_column_checkboxes()
 
@@ -175,9 +177,11 @@ class ModelChoiceFrame(ctk.CTkFrame):
 
     def plot(self):
         self.master.graph_frame.plot()
+        self.plot_stats()
 
     def plot_pca(self):
         self.master.graph_frame.pca_plot(model=self.master.model, columns=self.master.columns)
+        self.plot_stats()
 
     def plot_stats(self):
         self.master.stats_frame.plot()
@@ -208,18 +212,18 @@ class ModelChoiceFrame(ctk.CTkFrame):
             self.master.models[self.model_choice.get()]["params"][param]["value"] = self.master.models[self.model_choice.get()]["params"][param]["default"]
 
 
-class StatsFrame(ctk.CTkFrame):
+class StatsFrame(ctk.CTkScrollableFrame):
 
     def __init__(self, master=None):
-        super().__init__(master)
+        super().__init__(master, orientation="horizontal", width=master.horizontal_resolution-1600)
 
     def plot(self):
         
         if hasattr(self, "image_label"):
             self.image_label.destroy()
 
-        values = [value for value, checkbox in self.master.model_choice_frame.value_checkboxes.items() if checkbox.get()]
-        plot = self.master.clusterator.plot_features_distributiony_by_clusters(values)
+        values = [value for value, checkbox in self.master.master.master.model_choice_frame.value_checkboxes.items() if checkbox.get()]
+        plot = self.master.master.master.clusterator.plot_features_distributiony_by_clusters(values)
 
         buf = io.BytesIO()
         plot.savefig(buf, format='png')
@@ -227,9 +231,9 @@ class StatsFrame(ctk.CTkFrame):
 
         # Load the image from the buffer
         image = Image.open(buf)
-        window_height = self.winfo_height()
-        window_width = self.winfo_width()
-        image = image.resize((900, 1300), Image.Resampling.LANCZOS)
+        height = self.master.master.master.vertical_resolution
+        width = image.width * height // image.height
+        image = image.resize((width, height), Image.Resampling.LANCZOS)
         photo = ImageTk.PhotoImage(image)
 
         # Create a CTkLabel to display the image
@@ -252,9 +256,6 @@ class GraphFrame(ctk.CTkFrame):
     def __init__(self, master=None):
         super().__init__(master)
         
-        # add plot button
-        # self.plot_button = ctk.CTkButton(master=self, text="Plot", command=self.plot)
-        # self.plot_button.pack()
 
     def plot(self):
         # remove previous image if exists
@@ -270,9 +271,9 @@ class GraphFrame(ctk.CTkFrame):
 
         # Load the image from the buffer
         image = Image.open(buf)
-        window_height = self.winfo_height()
-        window_width = image.width * window_height // image.height
-        image = image.resize((1500, 1300), Image.Resampling.LANCZOS)
+        height = self.master.vertical_resolution // 2
+        width = height // 2 * 3
+        image = image.resize((width, height), Image.Resampling.LANCZOS)
         photo = ImageTk.PhotoImage(image)
 
         # Create a CTkLabel to display the image
@@ -296,9 +297,9 @@ class GraphFrame(ctk.CTkFrame):
 
         # Load the image from the buffer
         image = Image.open(buf)
-        window_height = self.winfo_height()
-        window_width = image.width * window_height // image.height
-        image = image.resize((1500, 1300), Image.Resampling.LANCZOS)
+        height = self.master.vertical_resolution // 2
+        width = height // 2 * 3
+        image = image.resize((width, height), Image.Resampling.LANCZOS)
         photo = ImageTk.PhotoImage(image)
 
         # Create a CTkLabel to display the image
