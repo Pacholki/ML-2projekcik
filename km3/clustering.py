@@ -57,13 +57,13 @@ class Clusterator():
         results_df["cluster"] = model.fit_predict(working_df)
 
         self.results_df = results_df
-        self.working_df = pd.DataFrame(working_df, columns=columns_iter)
+        self.working_df = pd.DataFrame(working_df)
 
     def prep_df(self, columns):
 
         results_df = self.df.copy()
         working_df = self.df.copy()[columns]
-
+        
         for column in columns:
             mask = self.get_mask(column, working_df)
             results_df = results_df[mask]
@@ -87,14 +87,17 @@ class Clusterator():
         if column in ["price", "number_of_reviews", "reviews_per_month", "calculated_host_listings_count", "popularity"]:
             df[column] = np.log1p(df[column])
 
-    def plot(self, df=None, color_column="cluster", palette="deep", ax=None, show_values=None):
-        if not df:
-            df = self.results_df
+    def plot(self, df=None, pca=False, color_column="cluster", palette="viridis", ax=None, show_values=None):
+        if df is None:
+            if pca:
+                df = self.pca_result_df
+            else:
+                df = self.results_df
 
         fig, ax = plt.subplots()
         legend_setting = "brief" if show_values is not None else False
-        plot = sns.scatterplot(data=df, x="longitude", y="latitude", hue=df[color_column], legend=legend_setting, palette=palette, ax=ax, alpha=0.7)
-
+        plot = sns.scatterplot(data=df, x="longitude", y="latitude", hue=df[color_column], legend=legend_setting, palette=palette, ax=ax, alpha=0.7, sizes=(0.5, 0.5))
+        plt.show()
         if not show_values:
             return plot
         
@@ -104,7 +107,7 @@ class Clusterator():
             show_values_iter = [show_values]
 
         for column in show_values_iter:
-            self.print_desc_table(df=self.results_df, column=column, group_column=color_column)
+            self.print_desc_table(df=df, column=column, group_column=color_column)
         
         return plot
     
@@ -127,17 +130,14 @@ class Clusterator():
     
     def pca_plot(self, model, columns, df=None, n_components=2, ax=None):
         if not df:
-            df = self.results_df
-
+            df = self.working_df
+        
         pca = PCA(n_components=n_components)
-        df = df[columns]
-        df = StandardScaler().fit_transform(df)
         pca_result = pca.fit_transform(df)
-        model.fit(pca_result)
         pca_2 = PCA(n_components=2)
         pca_result_2 = pca_2.fit_transform(df)
         pca_df = pd.DataFrame(pca_result_2, columns=["PC1", "PC2"])
-        pca_df["cluster"] = model.labels_
+        pca_df["cluster"] = model.fit_predict(pca_result)
         plt.figure(figsize=(10, 8))
         scatter = plt.scatter(pca_df['PC1'], pca_df['PC2'], c=pca_df['cluster'], cmap='viridis', alpha=0.7)
         plt.xlabel('Principal Component 1')
@@ -146,11 +146,18 @@ class Clusterator():
         plt.title(f'{model.__class__.__name__} Clustering Visualization in 2D')
         plt.show()
 
-    def plot_cluster_distribution(self, df=None, column="cluster", ax=None):
+                
+        self.pca_result_df = self.results_df.copy()
+        self.pca_result_df['cluster'] = model.fit_predict(pca_result)
+    
+    def plot_cluster_distribution(self, df=None, column="cluster", ax=None, pca=False):
         if not df:
-            df = self.results_df
+            if pca:
+                df = self.pca_result_df
+            else:
+                df = self.results_df
 
-        sns.countplot(x=column, data=df, ax=ax, palette='viridis')
+        sns.countplot(x=column, data=df, hue=column, ax=ax, palette='viridis')
         plt.title('Cluster Distribution')
         plt.show()
 
@@ -209,9 +216,12 @@ class Clusterator():
             davies_bouldin.append(davies_bouldin_score(df, kmeans.labels_))
         return davies_bouldin
     
-    def plot_features_distributiony_by_clusters(self, columns, df=None, cluster_column="cluster", ax=None):
+    def plot_features_distributiony_by_clusters(self, columns, pca=False, df=None, cluster_column="cluster", ax=None):
         if not df:
-            df = self.results_df
+            if pca:
+                df = self.pca_result_df
+            else:
+                df = self.results_df
         self.check_columns(columns)
         ## i want grid layout (2 plots each row)
         fig, ax = plt.subplots(len(columns)//2 + 1, 2, figsize=(15, 15))
